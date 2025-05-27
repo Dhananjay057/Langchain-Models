@@ -47,9 +47,4 @@ Cons:
 result = structured_model.invoke(review_text)
 
 # Output result
-print(result)
-print("Summary:", result.summary)
-print("Sentiment:", result.sentiment)
-print("Key Themes:", result.key_themes)
-print("Pros:", result.pros)
-print("Cons:", result.cons)
+print(result) 

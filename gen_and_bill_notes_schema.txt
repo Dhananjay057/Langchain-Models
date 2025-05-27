@@ -1,0 +1,81 @@
+{
+  "$defs": {
+    "NoteSummary": {
+      "properties": {
+        "noteDate": {
+          "description": "Date when the note was created.",
+          "title": "Notedate",
+          "type": "string"
+        },
+        "summaryText": {
+          "description": "Summary text of the note.",
+          "title": "Summarytext",
+          "type": "string"
+        }
+      },
+      "required": [
+        "noteDate",
+        "summaryText"
+      ],
+      "title": "NoteSummary",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "rxNumber": {
+      "description": "Specify the prescription number (Rx) related to this task. Fetch the Rx Number only from the field **finalDisplayEntityId**.",
+      "title": "Rxnumber",
+      "type": "string"
+    },
+    "drugName": {
+      "description": "Provide the name of the drug only from the field  **medicineName** associated with the Rx number.",
+      "title": "Drugname",
+      "type": "string"
+    },
+    "diagnosis": {
+      "description": "Follow **Bil Notes Summary** Instructions to provide the summary.",
+      "items": {
+        "$ref": "#/$defs/NoteSummary"
+      },
+      "title": "Bilnotessummary",
+      "type": "array"
+    },
+    "currentPAstatus": {
+      "description": "Provide the current PA status of the task. Fetch the PA Status only from the field **paStatus**.",
+      "title": "Currentpastatus",
+      "type": "string"
+    },
+    "LastTouchDate": {
+      "description": "Provide the date of the last touch for the task. Fetch the Last Touch Date only from the field **lastTouchDate**.",
+      "title": "Lasttouchdate",
+      "type": "string"
+    },
+    "prescriberInformation": {
+      "description": "Follow **Prescriber Information** Instructions to provide the summary.",
+      "items": {
+        "$ref": "#/$defs/NoteSummary"
+      },
+      "title": "Prescriberinformation",
+      "type": "array"
+    },
+    "notesSummary": {
+      "description": "Follow **Gen Notes Summary** Instructions to provide the summary.",
+      "items": {
+        "$ref": "#/$defs/NoteSummary"
+      },
+      "title": "Gennotessummary",
+      "type": "array"
+    }
+  },
+  "required": [
+    "rxNumber",
+    "drugName",
+    "diagnosis",
+    "currentPAstatus",
+    "LastTouchDate",
+    "prescriberInformation",
+    "notesSummary"
+  ],
+  "title": "GenAndBillNotesSummary",
+  "type": "object"
+}

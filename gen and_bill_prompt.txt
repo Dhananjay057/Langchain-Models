@@ -1,0 +1,232 @@
+### **Patient Activities:**
+
+#### **Objective:**  
+- Summarize only the activities where **Bpm Task Name** is *Contact Patient for Status Update** and whose corresponding **Task Status** is any of the following i.e. **open**,**pending**,**Assigned**or **Unassigned**.
+
+#### **Instructions:**
+- From the table **Patient Task History Details**, identify the rows where column **Bpm Task Name** has the values **Contact Patient for Status Update** and the column **Task Status**has any of the following values i.e. 
+    - **OPEN**,
+    - **PENDING**,
+    - **ASSIGNED**, 
+    - **UNASSIGNED**. 
+- You must have separate **Contact Patient for Status Update**Task Patient activities for separate Drug Name.
+-Always avoid picking up **Contact Patient for Status Update** from the column **Bpm Task Name**  if the value in the **Task Status** is **COMPLETED**.
+- Create separate json schema for every OPEN, PENDING, ASSIGNED, UNASSIGNED.
+- Fetch the **Task Status** from **Patient Task History Details** as ASSIGNED OR UNASSIGNED or OPEN or PENDING.
+
+#### Output Format:222222222
+- If the Bpm Task name is Contact Patient for Status Update, Your output should be: Contact Patient for Status Update
+
+#### Constraints:
+- Only from **Patient Task History Details**, always exclude the rows where the value of the **Task status** column is **COMPLETED**.
+
+#### Recap:
+- The selected Contact Patient for Status Update activities must be associated with an Rx Number and have a Task Status of open, pending, assigned, or unassigned.
+- Completed tasks should not be included.
+
+---
+
+
+
+### **1. Gen notes summary:**
+
+**Objective:** 
+- Write the summary from the **Patient Notes Details** with **Note Type Indicator**: **GENERAL** or **Note Type Code**: **GEN** 
+
+**Instructions**:
+- Review the provided **Patient notes Details** for **Note Type Indicator: GENERAL** or **Note Type Code**: **GEN**.
+- From column **Note Summary Text** and **Note Text**, summarize each activity detailing what happen, how it happen, and how each issue addressed or resolved.
+- Based on value in Created date and Account number, identify which activity is related to which Drug name and Bpm TASK name:Contact Patient for Status Update from the Task history details table and assign the respective activities to the genNotesSummary column of their respective Drug name or task name in the json schema.
+ 
+  #### **Constraints:**
+- Any note that qualifies as Inbound or Outbound communication MUST NOT appear here, even if it has GENERAL/GEN type
+- strictly exclude **Note Summary Text**, **Note Text** , **User Comment** with keywords like:
+- **Inbound**,
+- **Outbound**, 
+- **IBC**,
+- **<SM><FFT-PATIENT-CONTACT (NSM)>**,
+- **<SM><FFT-PA-NEEDED (NSM)>**
+- **<SM><DOCTOR NO RESPONSE(SM)>**
+- **OAC**,
+- **Shipment**,
+-**Shipped**,
+- **Outcome Call**, 
+- **Silverlink**, from it, even if it has GENERAL/GEN type. Consolidate the summary on the basis of **GEN** notes type. Consolidate all the summary in a single paragraph, avoid duplication of text.
+- If multiple summary are on the same date then just combine all those summary.
+
+#### Output Format:
+Your output format must be like:
+['Latest Date']: ['Summary of **Note Text** and **Note Summary Text** for the above found records in a single bullet point.']
+ 
+
+
+#### **Examples:**
+-If the input is like below :
+- "04/09/2023: Received  <45241226> and <45200456> with <CLINICAL (NON PA),RX> for <HUMIRA PEN> within SPRx Intake on 04/10/2024 and 04/09/2024.  Doc(s) can be viewed within Pt SPRx Profile-Images." 
+- "03/07/2023: *WORKING MULTI CALL OPEN STATUS REPORT*- NRX HAS NOT BEEN RECEIVED AND THERE IS NO ORDER SCHEDULED, MEMBER HAS BEEN ADVISED. CLEARED FROM:TOOL on 03/07. on  03/06/2024. PT PROVIDED -PRESCRIBER INFO: ELIEZER NATAL M.D., SALUD GU YNABO, PH * 787-70-1996 FAX 787-789-2180, USBETH OTERO, OFFICE on 3/6 and an attempt from the FEP RECON Team on 3/5."
+- "11/08/2024: New Patient Enrollment Status: ORDER RELEASE. New Patient Enrollment. Ship to arrive <  > < 11/15/2024 > to address: < ship to address not provided >.New Patient Enrollment. Patient enrolled via < CAREGIVER PHONE ENROLLMENT > by < Z313595 >, Phone/Fax #: <  >, <  > for < TRUVADA >.  Method to obtain rx: <  >. Referring MD: <   > <  >."
+-"11/09/2024:Received <1018181> with <RX> for <TRUVADA> within SPRx Intake.  Doc(s) can be viewed within Pt SPRx Profile-Images."
+
+ -your output should be like below :
+-"04/09/2023: Clinical and RX documentation for HUMIRA PEN received <45241226> and <45200456>  on 04/10 and 04/09, available in the patient's SPRx profile images."
+-"03/07/2023: Multi-call open status report indicates no NRX received and no order scheduled. ELIEZER NATAL M.D., SALUD GU YNABO provided prescriber information through PH * 787-70-1996 FAX 787-789-2180, USBETH OTERO, OFFICE  on 03/06. Previous attempts by FEP RECON team on 03/05 noted."
+-"11/08/2024: New Patient Enrollment for TRUVADA completed via caregiver phone enrollment by Z313595 . Shipment scheduled to arrive on 11/15/2024. Shipping address not provided; referring MD details missing."
+-"11/09/2024:  RX received <1018181> for TRUVADA, documents available in patient's SPRx profile images."
+
+
+**Recap:**
+- Follow the Instructions and Exclude the things given in constraints and provide a concise Summary as per Examples.
+- If multiple summaries are on the same date the just combine it.
+
+### **2. Bill notes summary:**
+
+#### **Objective:** 
+- Write the summary from the **Patient Notes Details** with **Note Type Indicator**: ***BILLING/PRICING/PRIOR AUTH** or **Note Type Code**: **BIL** 
+
+#### **Instructions:**
+- Review the provided **Patient notes Details** for **Note Type Indicator: BILLING/PRICING/PRIOR AUTH** or **Note Type Code**: **BIL**.
+- From column **Note Summary Text** and **Note Text**, summarize each activity detailing what happen, how it happen, and how each issue addressed or resolved.
+- Based on value in Created date and Account number, identify which activity is related to which Drug name and Bpm TASK name: Contact Patient for Status Update from the Task history details table and assign the respective activities to the bilNotesSummary column of their respective Drug name or task name in the json schema.
+
+#### Output format
+Your output should be in the format [Latest date]: [Combine summary from **Note Text** and **Note Summary Text** with list of all the dates identified in this particular summary]. 
+ 
+
+#### **Constraints:**
+- strictly exclude **note summary Text** , **note Text** , **COMMENTS** with keywords like:
+- **Inbound**,
+- **Outbound**, 
+- **IBC**,
+- **<SM><FFT-PATIENT-CONTACT (NSM)>**,
+- **<SM><FFT-PA-NEEDED (NSM)>**
+- **<SM><DOCTOR NO RESPONSE(SM)>**
+- **OAC**,
+- **Outcome Call**, 
+- **Silverlink**, from it. Consolidate all the summary in a single paragraph, avoid duplication of text on the basis of **bilNotesSummary** type. 
+
+#### **Examples:**
+
+- If the input is like below :
+- "02/21/2024: NOTE ENTERED BY: ESTELITO PAGHUNASAN ~ THERAPY:~ DRUG NAME:TALTZ ~ RX#:18716355~ CLAIM PAID COPAY LEFT $3809.18 // SEC PAYOR    SLF-SLF // NO CPA ON FILE FOR TALTZ // SENT IMM TO PT // PEND F/U 24 HRS."
+
+ -your output should be like below :
+ -"02/21/2024: Therapy for TALTZ noted by Estelito Paghunasan. Claim paid, with a remaining copay of $3809.18. Secondary payor: SLF-SLF. No CPA on file for TALTZ with RX 18716355 . IMM sent to the patient. Follow-up pending in 24 hours. "
+
+**Recap:**
+- Follow the Instructions and Exclude the things given in constraints and provide a concise Summary as per Examples.
+
+### **3. CS notes summary:**
+#### **Objective:** 
+- Write the summary from the **Note Type Indicator: CUSTOMER SERVICE** or **Note Type Code**: **CS**
+
+#### **Instructions:**
+ - Review the provided **Patient notes Details** for any **Note Type Indicator: CUSTOMER SERVICE** or **Note Type Code**: **CS**
+ - From **Note Type Indicator: CUSTOMER SERVICE**, review **Note Text** and include the information related to keyword **Customer service**,avoid duplication of text.
+ 
+### **4. SV notes summary:**
+#### **Objective:** 
+- Write the summary from the **Note Type Indicator: SERVICE **or **Note Type Code**: **SV**
+#### **Instructions:**
+ - Review the provided **Patient notes Details** for any **Note Type Indicator: SERVICE** or **Note Type Code**: **SV**
+ - From **Note Type Indicator: SERVICE**, review **Note Text** and include the information related to keyword **Service**,avoid duplication of text.
+
+ 
+### **5.Invoice notes summary:**
+#### **Objective:** 
+-  Write the summary from the **Note Type Indicator: INVOICING**or **Note Type Code**: **INV**
+#### **Instructions:**
+ - Review the provided **Patient notes Details** for any **Note Type Indicator: INVOICING** or **Note Type Code**: **INV**
+ - From **Note Type Indicator: INVOICING**, review **Note Text** and include the information related to keyword **Invoicing/Invoice**,avoid duplication of text.
+ 
+### **6.RCC notes summary:**
+#### **Objective:** 
+-  Write the summary from the **Note Type Indicator: Reimbursement Counselling Centre** or **Note Type Code**: **RCC**
+#### **Instructions:**
+- Review the provided **Patient notes Details** for any **Note Type Indicator: Reimbursement counselling centre** or **Note Type Code**: **RCC**
+ - From **Note Type Indicator: Reimbursement Counselling Centre**, review **Note Text** and include the information related to keyword **Reimbursement Counselling Centre**,avoid duplication of text.
+
+You must only respond in JSON format that adheres to the following schema. You must have separate schema for each separate task name corresponding to separate Drug Name.:
+
+         <JSON_SCHEMA>
+    {
+  "properties": {
+    "taskName": {
+      "description": "From **Patient Task History Details** ,Specify  the **Bpm Task Name** including its **Task status**. Pick **Bpm Task name**  and append with its corresponding **Task status** (e.g.,  'Contact Patient for Status Update - Completed').",
+      "title": "Taskname",
+      "type": "string"
+      "pattern": "(?i)^(CONTACT PATIENT FOR STATUS UPDATE|PA TASKS) - (Assigned|Unassigned|Completed|Cancelled)$"
+    },
+    "rxNumber": {
+      "description": "Specify the prescription number (Rx) related to this task. Fetch the Rx Number from the field Entity Id which is present in the table Patient Task History Details . If the Rx number is not explicitly mentioned in the source, leave this field empty. Rx number is critical for us, make sure to include it if it is available.",
+      "title": "Rxnumber",
+      "type": "string"
+    },
+    "drugName": {
+      "description": "Provide the name of the drug associated with the task. Example: [Enbrel 20mg],[Humira Pen]. Make sure the drug name corresponds to the Rx number provided.",
+      "title": "Drugname",
+      "type": "string"
+    },
+    "bilNotesSummary": {
+      "description": "Follow **Bil Notes Summary** Instructions to provide the summary.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Bilnotessummary",
+      "type": "array"
+    },
+    "genNotesSummary": {
+      "description": "Follow **Gen Notes Summary** Instructions to provide the summary.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Gennotessummary",
+      "type": "array"
+    },
+ "csNotesSummary": {
+      "description": "Follow **cs Notes Summary** Instructions to provide the summary.",
+      "items": {
+        "type": "string"
+      },
+      "title": "csnotessummary",
+      "type": "array"
+    },
+ "svNotesSummary": {
+      "description": "Follow **sv Notes Summary** Instructions to provide the summary.",
+      "items": {
+        "type": "string"
+      },
+      "title": "svnotessummary",
+      "type": "array"
+    },
+ "rccNotesSummary": {
+      "description": "Follow **rcc Notes Summary** Instructions to provide the summary.",
+      "items": {
+        "type": "string"
+      },
+      "title": "rccnotessummary",
+      "type": "array"
+    },
+ "invoiceNotesSummary": {
+      "description": "Follow **invoice Notes Summary** Instructions to provide the summary.",
+      "items": {
+        "type": "string"
+      },
+      "title": "invoicenotessummary",
+      "type": "array"
+    }
+  },
+  "required": [
+    "taskName",
+    "rxNumber",
+    "drugName",
+    "bilNotesSummary",
+    "genNotesSummary",
+    "csNotesSummary",
+   "svNotesSummary",
+   "rccNotesSummary",
+   "invoiceNotesSummary",
+  ],
+  "title": "individualTasksPa",
+  "type": "object"
+}
+    </JSON_SCHEMA>

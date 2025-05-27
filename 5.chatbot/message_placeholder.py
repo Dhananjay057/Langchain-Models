@@ -17,4 +17,4 @@ with open('5.chatbot/chat_history.txt') as f:
 
 prompt = chat_template.invoke({'chat_history':chat_history, 'query':"where is my refund"})
 
-#print(prompt)
+# print(prompt)
