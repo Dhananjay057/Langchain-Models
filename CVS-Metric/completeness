@@ -1,0 +1,76 @@
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.output_parsers import StrOutputParser
+from langchain.prompts import PromptTemplate
+from langchain.schema.runnable import RunnableSequence, RunnableParallel
+from langchain_community.document_loaders import TextLoader
+from dotenv import load_dotenv
+import json
+
+load_dotenv()
+
+model = ChatGoogleGenerativeAI(model='gemini-2.0-flash')
+
+prompt1 =PromptTemplate(
+    input_variables=['note', 'summary'],
+    template="""\
+# Evaluation
+## Metric Definition
+You will be assessing summarization quality, which measures the overall ability to summarize text and include all the important information. The response should not contain information that is not present in the context.Make sure it contains all the imortant informations
+
+## Criteria
+Instruction following: The response demonstrates a clear understanding of the summarization task instructions, satisfying all of the instruction's requirements.
+Groundedness: The response contains information included only in the context. The response does not reference any outside information.
+Conciseness: The response summarizes the relevant details in the original text without a significant loss in key information without being too verbose or terse.
+
+## Example
+Prompt Template:
+
+You are a medical summarization evaluator. Review whether the summary captures all important facts from the original note.
+
+
+Instructions:
+- Cover all relevant critical information from the note, and communication records for each drug.
+- Include system events, actions taken, outcomes, and timestamps.
+- Focus on dates,treatment changes, symptoms, drug name mentions, and provider instructions.
+- Score Completeness from 0 to 100%.
+
+
+# User Inputs and AI-generated Response
+## User Inputs
+"{note}"
+
+##Important Information
+Please check the following aspects carefully:
+
+1. Confirm that only the relevant note types are included in the summary:
+ For general notes summary, only notes with `noteTypeInd` = GENERAL or `noteTypeCd` = GEN should be included.
+  For billing notes summary, only notes with `noteTypeInd` = BILLING/PRICING/PRIOR AUTH or `noteTypeCd` = BIL should be included.
+  No irrelevant note types should be present.
+
+2. Verify that the summary uses information from both `noteSummaryTxt` and `noteTxt` fields in the patient notes.
+
+4. Confirm that activities are assigned correctly to drugs based on exact matches of `medicineName` or `rxNumber`. There should be no misassignment when exact matches exist.
+
+5. If exact drug names are not present in some summaries, check if the summary is assigned to all drugs sharing the first word of the drug name, and that no incorrect assignments occur beyond this rule.
+
+6. Ensure that no summaries from one drug are assigned to another drug unless allowed by the first-word matching rule.
+
+Generated Summary:"{summary}"
+"""
+)
+
+loader1= TextLoader('input1.txt',encoding='utf-8')
+input = loader1.load()
+
+loader2= TextLoader('output1.txt',encoding='utf-8')
+output = loader2.load()
+
+
+parser = StrOutputParser()
+chain = prompt1| model | parser 
+
+result = chain.invoke({'note':input[0].page_content,'summary':output[0].page_content})
+# parsed_result = json.loads(result)
+# print(parsed_result)
+print(result)
+

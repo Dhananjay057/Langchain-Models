@@ -1,0 +1,24 @@
+[{'rxNumber': '15734693-00',
+
+  'drugName': 'LIPITOR',
+
+  'insuranceInformation': [{'noteDate': '01/31/2025',
+
+    'summaryText': 'CVS PAYOR TOLD THAT LIPITOR IS NOT COVERED UNDER THE INSURANCE.'}],
+
+  'prescriberInformation': [{'noteDate': '01/31/2025',
+
+    'summaryText': 'KIM TOLD PATIENT TO WAIT FOR PRESCRIBER RESPONSE FOR LIPITOR.'}]},
+
+{'rxNumber': '15733822-00',
+
+  'drugName': 'CAPECITABINE',
+
+  'insuranceInformation': [{'noteDate': '01/31/2025',
+
+    'summaryText': 'PAYOR FROM CVS CONFIRMS ON THE COVERAGE OF CAPECITABINE. PATIENT WANT TO KNOW WHETHER CAPECITABINE IS INCLUDED IN THE INSURANCE.'}],
+
+  'prescriberInformation': [{'noteDate': '01/09/2025',
+
+    'summaryText': 'Patient enrolled via < FAX OCR > by < AKUMAR4 >, Phone/Fax #: <  >, <  > for < CAPECITABINE >. Method to obtain rx: <  >. Referring MD: < TESS LINS > <  >.'}]},
+]
