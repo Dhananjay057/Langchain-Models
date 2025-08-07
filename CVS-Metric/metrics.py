@@ -6,100 +6,124 @@ from langchain_community.document_loaders import TextLoader
 from dotenv import load_dotenv
 import json
 
+# Load environment variables
 load_dotenv()
 
+# Initialize Gemini model
 model = ChatGoogleGenerativeAI(model='gemini-2.0-flash')
 
-prompt1 =PromptTemplate(
+# Prompt template with fixed escaped braces in output format section
+prompt1 = PromptTemplate(
     input_variables=['note', 'summary'],
-    template="""\
+    template="""
 # Evaluation
 ## Metric Definition
-You will be assessing truthfulness, which measures the ability to provide a response based on the user prompt without any hallucinations.
+You will be assessing **Truthfulness**, which measures whether the generated summary is entirely based on the original patient notes and instructions — with no hallucinated, fabricated, or omitted factual information.
 
 ## Criteria
-Truthfulness: The response contains information included only in the user prompt. The response does not reference any outside information.
+Truthfulness requires:
+- The response includes only facts directly found in the input notes
+- No fabricated, reworded, or assumed content appears
+- All task-specific structural and informational requirements are respected, including correct date, note type, drug name, and routing logic
 
-## Example
-Prompt Template:
+## Required Rule Checks for Truthfulness:
 
-You are an expert evaluator. Compare the original note and its generated summary. Evaluate if the summary is factually correct based only on the content in the original note. We will provide you with the user input and AI-generated summary. You should first read the user input carefully for analyzing the task, and then evaluate the quality of the summary based on the Criteria provided in the Evaluation section below
+- **R4**: Each summary must contain, when applicable:  
+  1) Who did it  
+  2) What was done  
+  3) How it was done (method/route)  
+  4) Outcome of the action  
+  5) Drug involved  
+  *(All are mandatory and must match source notes)*
+
+- **R5**: PA Tasks must be listed individually using this format:  
+  *Triggering Task; Prescription and Fill Number; Drug Name*
+
+- **R6**: If there are **multiple PA tasks**, each must be listed separately at the *Task / Prescription # / Fill # / Medispan* level
+
+- **R7**: No other tasks (non-PA) should be listed under the summary
+
+- **R8**: Under each PA Task, patient activity should be listed in **reverse chronological order (latest to oldest)**.  
+  Summaries must elaborate on communication attempts with date/time, **route** (e.g., phone/SMS), and **outcome**
+
+- **R10**: Each PA task summary should include:  
+  1) Latest task date  
+  2) Summary of task history  
+  3) Action taken (how)  
+  4) Outcomes  
+  5) Date reference (should match notes)
+
+- **R11**: For GEN :  
+  Format must include —  
+  *1) Latest Action Date; 2) Note Type; 3) Note Summary*
+
+- **R14**: Under each PA task, communication summaries must follow **chronological order**, and include:  
+  - Attempt date/time  
+  - Communication route (e.g., call/SMS)  
+  - Phone number (if present)  
+  - Outcomes  
 
 ## Evaluation Rating
 
-Very High – 90-100% : All summary content is fully accurate and directly supported by the original note.
-High – 80-89% : Mostly accurate with minor wording differences; no added or false information.
-Moderate – 70-79% : Some inaccuracies or unsupported claims, but the main message aligns with the note.
-Low – 40-69% : Several inaccuracies or hallucinated details that misrepresent the note.
-Very Low – 0-39% : Summary is largely unfaithful, with many fabricated or incorrect details.
+- **Very High – 90–100%**: Fully accurate and faithful; all data and formatting match source
+- **High – 80–89%**: Minor wording variance; structurally and factually consistent
+- **Moderate – 70–79%**: Some minor unsupported claims; key message mostly aligns
+- **Low – 40–69%**: Several incorrect/missing elements; multiple misinterpretations
+- **Very Low – 0–39%**: Heavily hallucinated or misaligned from original
 
-Instructions:
-- Identify any hallucinated, inaccurate, or altered information.
-- Only consider content present in the note.
-- Score the Truthfulness from 0 to 100%.
+## Instructions:
+- Carefully verify if the summary adheres to **all the rules listed above**
+- Confirm the summary only includes content from the source note(s)
+- Note any hallucinations, false claims, missing data, or improper formatting
+- Evaluate structure, order, and factual grounding
+- Then, assign a score from **0 to 100** and provide a brief rationale
 
-
-Output format:{{ "truthfulness_score": <int from 0 to 100>, "explanation": "<brief justification of the score>"}}
-
+---
 
 # User Inputs and AI-generated Response
-## User Inputs
-"{note}"
 
-### Prompt given for summary generation
-(## **1. Gen notes summary:**
- 
-#### **Objective:**
-- Write the summary from the **patientNoteList** with **noteTypeInd**: **GENERAL** or **noteTypeCd**: **GEN**  only in 100 words.
- 
-#### **Instructions**:
-- Review the provided **patientNoteList** for **noteTypeInd**: **GENERAL** or **noteTypeCd**: **GEN** only.
-- From column **noteSummaryTxt** and **noteTxt**, summarize each activity detailing what happen, how it happen, and how each issue addressed or resolved.
-- Identify which activity is related to which medicineName or rxNumber and assign the respective activities to the genNotesSummary column of their respective Drug name or rxNumber where exact drugName matches in the json schema.
-- There are some summary where exact medicineName is not present, identify such summary and assign the summary to every genNotesSummary of the schema where first word of the drugName matches with the medicineName present in the summary.
-#### **Constraints:**
-- If multiple summary are on the same date then just combine all those summary.
-- Identify the drug name and extract its first word 'FirstWord'. If a summary is present under 'noteSummaryTxt' or 'noteTxt' which only contains the 'FirstWord' of the drug name, then the summary should be mentioned in the summaries of all the drugs with that 'FirstWord'. You MUST only match the 'FirstWord' of the drug name, if it does not match DO NOT list the summary under that drug.
-- DO NOT summarize the notes of one drug into another drug summary. CHECK if the drug name present in the notes is the same as the drug you are placing the summary in.
+## Important Checks:
+- Are all PA tasks correctly listed and separated?
+- Is every communication log accurately dated and explained?
+- Are all note types, drug references, and task actions present and factual?
+- Does the summary strictly follow structure and content expectations from the above rules?
 
-#### **Recap:**
-- If multiple summaries are on the same date then just combine it.
+---
 
+### Generated Summary:
+"{summary}"
 
-### **2. Bill notes summary:**
- 
-#### **Objective:**
-- Write the summary from the **patientNoteList** with **noteTypeInd**: ***BILLING/PRICING/PRIOR AUTH** or **noteTypeCd**: **BIL**
- 
-#### **Instructions:**
-- Review the provided **patientNoteList** for **noteTypeInd: BILLING/PRICING/PRIOR AUTH** or **noteTypeCd**: **BIL**.
-- From column **noteSummaryTxt** and **noteTxt**, summarize each activity detailing what happen, how it happen, and how each issue addressed or resolved.
-- Based on value in Created date and Account number, identify which activity is related to which Drug name or rxNumber and assign the respective activities to the bilNotesSummary column of their respective Drug name or task name in the json schema.
-- Identify the drug name and extract its first word 'FirstWord'. If a summary is present under 'noteSummaryTxt' or 'noteTxt' which only contains the 'FirstWord' of the drug name, then the summary should be mentioned in the summaries of all the drugs with that 'FirstWord'. You MUST only match the 'FirstWord' of the drug name, if it does not match DO NOT list the summary under that drug.
-- DO NOT summarize the notes of one drug into another drug summary. CHECK if the drug name present in the notes is the same as the drug you are placing the summary in. 
- 
-### Ensure that you followed these steps before giving response.
-CHECKING STEP 1: did I include only the relevant?
-CHECKING STEP 2: did I excluded all the unnecessary and irrelevant data?
-CHECKING STEP 3: did I followed all the Instructions, Examples and format?
-)
-Generated Summary:"{summary}"
+### Output Format:
+{{
+  "truthfulness_score": <int from 0 to 100>,
+  "explanation": "<brief justification of the score>"
+}}
 """
 )
 
-loader1= TextLoader('input1.txt',encoding='utf-8')
+# Load input note and output summary
+loader1 = TextLoader('input1.txt', encoding='utf-8')
 input = loader1.load()
 
-loader2= TextLoader('output1.txt',encoding='utf-8')
+loader2 = TextLoader('output1.txt', encoding='utf-8')
 output = loader2.load()
 
-
+# Initialize output parser
 parser = StrOutputParser()
-chain = prompt1| model | parser 
 
-result = chain.invoke({'note':input[0].page_content,'summary':output[0].page_content})
-# parsed_result = json.loads(result)
+# Combine into a processing chain
+chain = prompt1 | model | parser
+
+# Invoke the chain with inputs
+result = chain.invoke({
+    'note': input[0].page_content,
+    'summary': output[0].page_content
+})
+
+# Print the result
 print(result)
+
+# If you want to extract score and explanation programmatically:
+# parsed_result = json.loads(result)
 # print(parsed_result['truthfulness_score'])
 # print(parsed_result['explanation'])
-

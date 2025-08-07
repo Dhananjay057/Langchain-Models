@@ -144,3 +144,4 @@ print(f"Truthfulness Score: {truthfulness_result['truthfulness_score']}")
 print(f"Completeness Score: {completeness_result['completeness_score']}")
 
 print(f"Conciseness Rating: {conciseness_result['conciseness_rating']}")
+

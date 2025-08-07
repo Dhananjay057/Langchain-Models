@@ -1,6 +1,6 @@
 [{'rxNumber': '15734693-00',
 
-  'drugName': 'LIPITOR',
+  'drugName': 'cryptor'
 
   'insuranceInformation': [{'noteDate': '01/31/2025',
 
